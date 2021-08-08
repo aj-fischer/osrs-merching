@@ -19,6 +19,9 @@ def getCurrentPrice():
     return currentPrice
 
 def getLastPrice():
+    file = open("blood-prices.csv", "a")
+    if os.stat("blood-prices.csv").st_size == 0:
+        return
     with open("blood-prices.csv", "r") as f:
         lines = f.read().splitlines()
         lastLine = lines[-1]
@@ -26,26 +29,18 @@ def getLastPrice():
         lastPrice = lastLineItems[1]
         return lastPrice
 
-def logData(currentTime, currentPrice):
+def logData(currentTime, currentPrice, lastPrice):
     file = open("blood-prices.csv", "a")
     if os.stat("blood-prices.csv").st_size == 0:
         file.write("Last Change,Price\n")
-    elif getLastPrice() == currentPrice:
-        file.flush()
+        file.write(str(currentTime)+","+str(currentPrice)+"\n")
+    elif lastPrice == str(currentPrice):
         file.close()
         return
-    file.write(str(currentTime)+","+str(currentPrice)+"\n")
+    else:
+        file.write(str(currentTime)+","+str(currentPrice)+"\n")
     file.flush()
     file.close()
-
-# Logs data if program has just started and price has changed since last run
-logData(getCurrentTime(), str(getCurrentPrice()))
-
-while True:
-    pastPrice = getLastPrice()
-    time.sleep(360)
-    currentPrice = str(getCurrentPrice())
-    if (pastPrice != currentPrice):
-        # Send notification as well
-        currentTime = getCurrentTime()
-        logData(currentTime, currentPrice)
+    
+if __name__ == "__main__":
+    logData(getCurrentTime(), getCurrentPrice(), getLastPrice())
